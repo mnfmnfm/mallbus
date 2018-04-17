@@ -16,7 +16,7 @@ Product.votes = 0;
 Product.prototype.getTableRow = function() {
   var row = document.createElement('tr');
   var name = document.createElement('td');
-  name.textContent = this.img.split('.')[0].split('/')[1];
+  name.textContent = this.getName();
   row.appendChild(name);
   var votes = document.createElement('td');
   votes.textContent = this.percentage;
@@ -29,6 +29,10 @@ Product.prototype.getTableRow = function() {
 
 Product.prototype.updatePercentage = function() {
   this.percentage = (this.votes / this.views) || 0;
+};
+
+Product.prototype.getName = function() {
+  return this.img.split('.')[0].split('/')[1];
 };
 
 var PRODUCTS = ['bag.jpg',
@@ -63,6 +67,27 @@ function imageClicked(e) {
   } else {
     PRODUCTS.forEach(x => x.updatePercentage());
     PRODUCTS.sort( (a, b) => (b.percentage - a.percentage) || (b.views - a.views));
+    var ctx = document.getElementById('chart');
+    var data = {
+      labels: PRODUCTS.map(x => x.getName()),
+      datasets: [
+        {
+          label: 'Vote percentage on views',
+          data: PRODUCTS.map(x => x.percentage * 100),
+          backgroundColor: 'rgba(255, 70, 70, 0.2)'
+        },
+        {
+          label: 'Total number of views',
+          data: PRODUCTS.map(x => x.views),
+          backgroundColor: 'rgba(70, 255, 70, 0.2)'
+        }
+      ],
+    };
+    console.log(data);
+    var myChart = new Chart(ctx, { // eslint-disable-line
+      type: 'bar',
+      data: data
+    });
     var table = document.getElementById('tab');
     table.style.visibility = 'visible';
     PRODUCTS.forEach(x => table.appendChild(x.getTableRow()));
