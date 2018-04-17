@@ -8,7 +8,28 @@ function Product(img) {
   this.img = img;
   this.views = 0;
   this.votes = 0;
+  this.percentage = 0;
 }
+
+Product.votes = 0;
+
+Product.prototype.getTableRow = function() {
+  var row = document.createElement('tr');
+  var name = document.createElement('td');
+  name.textContent = this.img.split('.')[0].split('/')[1];
+  row.appendChild(name);
+  var votes = document.createElement('td');
+  votes.textContent = this.percentage;
+  row.appendChild(votes);
+  var totals = document.createElement('td');
+  totals.textContent = this.votes + ' / ' + this.views;
+  row.appendChild(totals);
+  return row;
+};
+
+Product.prototype.updatePercentage = function() {
+  this.percentage = (this.votes / this.views) || 0;
+};
 
 var PRODUCTS = ['bag.jpg',
   'banana.jpg',
@@ -32,16 +53,23 @@ var PRODUCTS = ['bag.jpg',
   'wine-glass.jpg'
 ].map(x => new Product('assets/' + x));
 
-function getCallback(num) {
-  return function(e) {
-    imageClicked(e, num);
-  };
-}
-
-function imageClicked(e, num) {
+function imageClicked(e) {
+  var num = parseInt(e.target.id);
   console.log('image ' + num + ' clicked');
   currentProducts[num].votes++;
-  pickProducts();
+  Product.votes++;
+  if (Product.votes < 25) {
+    pickProducts();
+  } else {
+    PRODUCTS.forEach(x => x.updatePercentage());
+    PRODUCTS.sort( (a, b) => (b.percentage - a.percentage) || (b.views - a.views));
+    var table = document.getElementById('tab');
+    table.style.visibility = 'visible';
+    PRODUCTS.forEach(x => table.appendChild(x.getTableRow()));
+    images.forEach(function(elem) {
+      elem.removeEventListener('click', imageClicked);
+    });
+  }
 }
 
 function pickProducts() {
@@ -58,7 +86,7 @@ function pickProducts() {
     images[i].src = currentProducts[i].img;
   }
 }
-images.forEach(function(elem, idx) {
-  elem.addEventListener('click', getCallback(idx));
+images.forEach(function(elem) {
+  elem.addEventListener('click', imageClicked);
 });
 pickProducts();
