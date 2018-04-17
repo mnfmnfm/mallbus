@@ -19,7 +19,7 @@ Product.prototype.getTableRow = function() {
   name.textContent = this.getName();
   row.appendChild(name);
   var votes = document.createElement('td');
-  votes.textContent = this.percentage;
+  votes.textContent = this.percentage.toFixed(2);
   row.appendChild(votes);
   var totals = document.createElement('td');
   totals.textContent = this.votes + ' / ' + this.views;
